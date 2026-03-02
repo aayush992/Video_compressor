@@ -286,13 +286,17 @@ def get_layout_strategy(
 # ---------------------------------------------------------------------------
 
 QUALITY_PRESETS = {
-    "light":    {"crf": 26, "bitrate": "8M",  "image_quality": 70,  "audio_bitrate": "96k"},
-    "balanced": {"crf": 22, "bitrate": "18M", "image_quality": 82,  "audio_bitrate": "128k"},
-    "best":     {"crf": 18, "bitrate": "28M", "image_quality": 92,  "audio_bitrate": "192k"},
+    # crf:   lower = better quality / larger file
+    #        28-30 for light (small file priority), 24-26 balanced, 20-22 best
+    # bitrate used as -maxrate cap only (prevents scene-complexity bloat),
+    #         NOT as a target — CRF is the driver.
+    "light":    {"crf": 30, "bitrate": "3M",  "image_quality": 65,  "audio_bitrate": "96k"},
+    "balanced": {"crf": 26, "bitrate": "6M",  "image_quality": 78,  "audio_bitrate": "128k"},
+    "best":     {"crf": 22, "bitrate": "12M", "image_quality": 88,  "audio_bitrate": "192k"},
 }
 
-# Estimated output sizes in MB per minute of video (rough heuristic)
-_VIDEO_MB_PER_MIN = {"light": 60, "balanced": 130, "best": 200}
+# Estimated output sizes in MB per minute of video (rough heuristic, CRF-based)
+_VIDEO_MB_PER_MIN = {"light": 22, "balanced": 45, "best": 90}
 _IMAGE_KB = {"light": 80, "balanced": 200, "best": 500}
 _AUDIO_MB_PER_MIN = {"light": 0.7, "balanced": 1.0, "best": 1.5}
 

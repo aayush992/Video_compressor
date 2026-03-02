@@ -247,7 +247,20 @@ def _build_video_ffmpeg_cmd(
     cmd += ["-c:v", video_codec]
     if options.crf is not None:
         cmd += ["-crf", str(options.crf)]
-    if options.bitrate:
+        # Use bitrate as a maxrate cap only — prevents file bloat in complex scenes
+        # but never forces a target rate (which would inflate small files).
+        if options.bitrate and video_codec != "libaom-av1":
+            # Parse suffix to derive bufsize (2× maxrate)
+            raw = options.bitrate
+            if raw.endswith("M"):
+                bufsize = f"{int(raw[:-1]) * 2}M"
+            elif raw.endswith("k"):
+                bufsize = f"{int(raw[:-1]) * 2}k"
+            else:
+                bufsize = raw
+            cmd += ["-maxrate", raw, "-bufsize", bufsize]
+    elif options.bitrate:
+        # No CRF — fall back to a proper ABR target (audio-only or AV1 path)
         cmd += ["-b:v", options.bitrate]
     if video_codec != "libaom-av1":
         cmd += ["-preset", preset]
