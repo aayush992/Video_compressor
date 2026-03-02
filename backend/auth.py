@@ -145,18 +145,62 @@ def verify_google_token(id_token: str) -> dict:
     Verify a Google OAuth2 id_token from @react-oauth/google.
     Returns idinfo dict with 'sub', 'email', etc.
     Raises ValueError if verification fails.
+
+    Strategy:
+      1. Try google-auth library (with clock-skew tolerance).
+      2. Fall back to Google's tokeninfo endpoint if step 1 fails
+         (handles cert-refresh races and is authoritative for GIS tokens).
     """
     if not _GOOGLE_CLIENT_ID:
         raise ValueError("GOOGLE_CLIENT_ID env var not set.")
+
+    # --- Attempt 1: google-auth library ---
     try:
         from google.oauth2 import id_token as google_id_token
         from google.auth.transport import requests as google_requests
+        import inspect
+        # Newer versions of google-auth support clock_skew_in_seconds
+        sig = inspect.signature(google_id_token.verify_oauth2_token)
+        kwargs = {"clock_skew_in_seconds": 10} if "clock_skew_in_seconds" in sig.parameters else {}
         idinfo = google_id_token.verify_oauth2_token(
-            id_token, google_requests.Request(), _GOOGLE_CLIENT_ID
+            id_token,
+            google_requests.Request(),
+            _GOOGLE_CLIENT_ID,
+            **kwargs,
         )
+        # google-auth may accept both bare and https-prefixed issuers
+        if idinfo.get("iss") not in ("accounts.google.com", "https://accounts.google.com"):
+            raise ValueError(f"Wrong token issuer: {idinfo.get('iss')}")
+        if not idinfo.get("email_verified", False):
+            raise ValueError("Google account email is not verified.")
         return idinfo
-    except Exception as exc:
-        raise ValueError(f"Google token verification failed: {exc}")
+    except ValueError:
+        raise  # re-raise explicit validation errors directly
+    except Exception as primary_exc:
+        pass  # fall through to tokeninfo fallback
+
+    # --- Attempt 2: tokeninfo endpoint fallback ---
+    try:
+        import urllib.request, json as _json
+        url = f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token}"
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            idinfo = _json.loads(resp.read().decode())
+        # Validate audience
+        aud = idinfo.get("aud", "")
+        if aud != _GOOGLE_CLIENT_ID:
+            raise ValueError(f"Token audience mismatch: expected {_GOOGLE_CLIENT_ID!r}, got {aud!r}")
+        if idinfo.get("iss") not in ("accounts.google.com", "https://accounts.google.com"):
+            raise ValueError(f"Wrong token issuer: {idinfo.get('iss')}")
+        if not idinfo.get("email_verified") in (True, "true"):
+            raise ValueError("Google account email is not verified.")
+        return idinfo
+    except ValueError:
+        raise
+    except Exception as fallback_exc:
+        raise ValueError(
+            f"Google token verification failed. "
+            f"Primary error: {primary_exc}. Fallback error: {fallback_exc}"
+        )
 
 
 # ---------------------------------------------------------------------------

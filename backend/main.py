@@ -338,11 +338,18 @@ def layout_strategy(body: _LayoutRequest):
 
 @app.get("/download/{filename}")
 def download_file(filename: str):
-    path = get_processed_path(filename)
+    # Strip directory components to prevent path traversal
+    safe_name = os.path.basename(filename)
+    if not safe_name:
+        raise HTTPException(status_code=400, detail="Invalid filename.")
+    path = get_processed_path(safe_name)
     if not os.path.isfile(path):
-        raise HTTPException(status_code=404, detail="File not found.")
-    mime, _ = mimetypes.guess_type(filename)
-    return FileResponse(path, media_type=mime or "application/octet-stream", filename=filename)
+        raise HTTPException(status_code=404, detail=f"File not found: {safe_name}")
+    try:
+        mime, _ = mimetypes.guess_type(safe_name)
+        return FileResponse(path, media_type=mime or "application/octet-stream", filename=safe_name)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to serve file: {exc}")
 
 
 # ---------------------------------------------------------------------------
@@ -429,20 +436,40 @@ def download_zip(body: _ZipRequest):
     if not body.filenames:
         raise HTTPException(status_code=400, detail="No filenames provided.")
 
-    buf = io.BytesIO()
-    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
-        for filename in body.filenames:
-            # Security: strip any directory components
-            safe_name = os.path.basename(filename)
-            path = get_processed_path(safe_name)
-            if os.path.isfile(path):
-                zf.write(path, safe_name)
-    buf.seek(0)
-    return StreamingResponse(
-        buf,
-        media_type="application/zip",
-        headers={"Content-Disposition": "attachment; filename=compressed_files.zip"},
-    )
+    try:
+        buf = io.BytesIO()
+        added = 0
+        missing: list[str] = []
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            for filename in body.filenames:
+                # Security: strip any directory components
+                safe_name = os.path.basename(filename)
+                if not safe_name:
+                    continue
+                path = get_processed_path(safe_name)
+                if os.path.isfile(path):
+                    try:
+                        zf.write(path, safe_name)
+                        added += 1
+                    except Exception as file_exc:
+                        missing.append(f"{safe_name} ({file_exc})")
+                else:
+                    missing.append(safe_name)
+        if added == 0:
+            detail = "None of the requested files were found."
+            if missing:
+                detail += " Missing: " + ", ".join(missing[:5])
+            raise HTTPException(status_code=404, detail=detail)
+        buf.seek(0)
+        return StreamingResponse(
+            buf,
+            media_type="application/zip",
+            headers={"Content-Disposition": "attachment; filename=compressed_files.zip"},
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to create ZIP archive: {exc}")
 
 
 # ---------------------------------------------------------------------------
