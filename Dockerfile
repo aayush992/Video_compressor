@@ -36,9 +36,9 @@ COPY backend/ ./backend/
 # Create upload/processed dirs (used when Cloudinary is not configured)
 RUN mkdir -p backend/uploads backend/processed
 
-# Fly.io sets PORT env var; default to 8080
-ENV PORT=8080
+# HF Spaces requires port 7860
+ENV PORT=7860
 
-EXPOSE 8080
+EXPOSE 7860
 
 CMD uvicorn backend.main:app --host 0.0.0.0 --port $PORT
