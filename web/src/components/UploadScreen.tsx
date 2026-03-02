@@ -105,7 +105,14 @@ export function UploadScreen({ onFileReady }: UploadScreenProps) {
         uploadFile(file, (pct) =>
           setQueue((prev) => {
             const next = [...prev];
-            if (next[index]) next[index] = { ...next[index], progress: Math.round(pct * 100) };
+            if (next[index]) {
+              const clamped = Math.min(99, Math.round(pct * 100));
+              // Progress must never decrease (guards against e.total fluctuation)
+              const current = next[index].progress;
+              if (clamped > current) {
+                next[index] = { ...next[index], progress: clamped };
+              }
+            }
             return next;
           })
         ),

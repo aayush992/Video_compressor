@@ -57,7 +57,11 @@ export async function uploadFile(
   const res = await client.post<UploadResponse>('/upload', form, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress: (e) => {
-      if (onProgress && e.total) onProgress(e.loaded / e.total);
+      // e.total can be 0 or change between events in some browsers
+      if (onProgress && e.total && e.total > 0) {
+        // Clamp to [0, 0.99] during upload; caller sets 100 on completion
+        onProgress(Math.min(0.99, e.loaded / e.total));
+      }
     },
   });
   return res.data;
