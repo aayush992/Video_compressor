@@ -346,8 +346,31 @@ def download_file(filename: str):
     if not os.path.isfile(path):
         raise HTTPException(status_code=404, detail=f"File not found: {safe_name}")
     try:
+        file_size = os.path.getsize(path)
         mime, _ = mimetypes.guess_type(safe_name)
-        return FileResponse(path, media_type=mime or "application/octet-stream", filename=safe_name)
+        content_type = mime or "application/octet-stream"
+
+        def _iter_file(file_path: str, chunk: int = 1024 * 256):
+            try:
+                with open(file_path, "rb") as fh:
+                    while True:
+                        data = fh.read(chunk)
+                        if not data:
+                            break
+                        yield data
+            except OSError as read_err:
+                # Log but can't raise HTTPException inside a generator —
+                # closing the iterator will just end the response.
+                import sys
+                print(f"[download] read error for {file_path}: {read_err}", file=sys.stderr)
+
+        headers = {
+            "Content-Disposition": f'attachment; filename="{safe_name}"',
+            "Content-Length": str(file_size),
+        }
+        return StreamingResponse(_iter_file(path), media_type=content_type, headers=headers)
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to serve file: {exc}")
 

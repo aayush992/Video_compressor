@@ -54,6 +54,7 @@ export interface Job {
   user_id?: string | null;
   // Metadata
   output_filename?: string | null;
+  outputUrl?: string | null;   // Cloudinary / remote URL (preferred for download)
   platform?: string | null;
   quality?: string | null;
   media_type?: string | null;

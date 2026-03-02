@@ -69,8 +69,8 @@ export default function PreviewAndCompressStep({
   // output_filename is set directly by the backend once encoding is done
   const outputFilename = job?.output_filename
     ?? (job?.output?.originalPath ? job.output.originalPath.split(/[\\\/]/).pop() : null)
-    ?? null;
-
+    ?? null;  // Prefer direct Cloudinary/remote URL if backend set it; fall back to local download endpoint
+  const resolvedDownloadUrl = job?.outputUrl || (outputFilename ? downloadUrl(outputFilename) : null);
   function stopPoll() {
     if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
   }
@@ -239,10 +239,10 @@ export default function PreviewAndCompressStep({
               )}
             </div>
           </div>
-          {outputFilename ? (
+          {resolvedDownloadUrl ? (
             <a
-              href={downloadUrl(outputFilename)}
-              download={outputFilename}
+              href={resolvedDownloadUrl}
+              download={outputFilename || 'compressed'}
               className="btn-download"
             >
               ⬇ Download

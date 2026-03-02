@@ -144,11 +144,11 @@ const HistoryPage: React.FC<Props> = ({ onBack }) => {
                 </div>
                 <div className="history-actions-row">
                   <span className={`status-badge ${job.status}`}>{job.status}</span>
-                  {job.status === 'done' && job.output_filename && (
+                  {job.status === 'done' && (job.outputUrl || job.output_filename) && (
                     <a
                       className="btn-secondary"
-                      href={downloadUrl(job.output_filename)}
-                      download
+                      href={job.outputUrl || downloadUrl(job.output_filename!)}
+                      download={job.output_filename || 'compressed'}
                     >
                       ⬇ Download
                     </a>
