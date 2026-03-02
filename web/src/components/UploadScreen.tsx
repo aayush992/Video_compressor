@@ -126,7 +126,20 @@ export function UploadScreen({ onFileReady }: UploadScreenProps) {
       });
       onFileReady(result, thumb);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Upload failed';
+      let msg = 'Upload failed. Please try again.';
+      if (err && typeof err === 'object') {
+        const status = (err as { response?: { status?: number } }).response?.status;
+        if (status === 413) msg = 'File too large — max 500 MB.';
+        else if (status === 415) msg = 'Unsupported file type.';
+        else if (status === 429) msg = 'Server busy — please try again in 30 seconds.';
+        else if (status === 503 || status === 502) msg = 'Backend is starting up — please retry in a moment.';
+        else if (status && status >= 500) msg = `Server error (${status}) — please retry.`;
+        else if ((err as { code?: string }).code === 'ERR_NETWORK' || (err as { code?: string }).code === 'ECONNABORTED') {
+          msg = 'Connection failed — check your internet or try a smaller file.';
+        } else if (err instanceof Error && err.message) {
+          msg = err.message;
+        }
+      }
       setQueue((prev) => {
         const next = [...prev];
         if (next[index]) next[index] = { ...next[index], status: 'error', progress: 0, error: msg };
