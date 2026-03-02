@@ -1,0 +1,11 @@
+{
+  "platform": "tiktok",
+  "label": "TikTok",
+  "resolution": "1080x1920",
+  "codec": "h264",
+  "fps": 30,
+  "bitrate": "15M",
+  "crf": 22,
+  "aspectMode": "crop",
+  "maxDuration": 600
+}

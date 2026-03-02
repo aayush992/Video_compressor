@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+env/
+.venv/
+*.env
+
+# Secrets — never commit
+.env
+backend/.env
+
+# Dev database
+dev.db
+*.db
+
+# Large ML model weights
+*.pt
+*.pth
+*.onnx
+
+# Backend runtime dirs (uploaded/processed files should not be committed)
+backend/uploads/
+backend/processed/
+
+# Frontend
+web/node_modules/
+web/build/
+web/dist/
+web/.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/settings.json
+.idea/
+
+# Old scaffolding (not used by the web app)
+frontend/
+mobile/

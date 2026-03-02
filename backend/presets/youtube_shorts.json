@@ -1,0 +1,11 @@
+{
+  "platform": "youtube_shorts",
+  "label": "YouTube Shorts",
+  "resolution": "1080x1920",
+  "codec": "h264",
+  "fps": 60,
+  "bitrate": "25M",
+  "crf": 18,
+  "aspectMode": "crop",
+  "maxDuration": 60
+}

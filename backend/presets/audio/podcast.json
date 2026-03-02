@@ -1,0 +1,7 @@
+{
+  "platform": "podcast",
+  "label": "Podcast (High Quality)",
+  "mediaType": "audio",
+  "codec": "mp3",
+  "bitrate": "192k"
+}

@@ -1,0 +1,7 @@
+{
+  "platform": "social_post",
+  "label": "Social Post (Audio)",
+  "mediaType": "audio",
+  "codec": "mp3",
+  "bitrate": "128k"
+}

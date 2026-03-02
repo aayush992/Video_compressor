@@ -1,0 +1,9 @@
+{
+  "platform": "instagram_post",
+  "label": "Instagram Post",
+  "mediaType": "image",
+  "resolution": "1080x1080",
+  "codec": "jpg",
+  "crf": 82,
+  "aspectMode": "crop"
+}

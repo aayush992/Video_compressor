@@ -1,0 +1,12 @@
+{
+  "platform": "instagram_reels",
+  "label": "Instagram Reels",
+  "mediaType": "video",
+  "resolution": "1080x1920",
+  "codec": "h264",
+  "fps": 30,
+  "bitrate": "20M",
+  "crf": 20,
+  "aspectMode": "crop",
+  "maxDuration": 90
+}

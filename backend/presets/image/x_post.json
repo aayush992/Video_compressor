@@ -1,0 +1,9 @@
+{
+  "platform": "x_post",
+  "label": "X (Twitter) Post",
+  "mediaType": "image",
+  "resolution": "1200x675",
+  "codec": "jpg",
+  "crf": 80,
+  "aspectMode": "letterbox"
+}

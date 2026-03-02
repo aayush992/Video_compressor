@@ -1,0 +1,12 @@
+{
+  "platform": "facebook_reels",
+  "label": "Facebook Reels",
+  "mediaType": "video",
+  "resolution": "1080x1920",
+  "codec": "h264",
+  "fps": 30,
+  "bitrate": "20M",
+  "crf": 20,
+  "aspectMode": "crop",
+  "maxDuration": 90
+}

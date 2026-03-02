@@ -1,0 +1,11 @@
+{
+  "platform": "twitter",
+  "label": "Twitter / X",
+  "resolution": "1280x720",
+  "codec": "h264",
+  "fps": 30,
+  "bitrate": "10M",
+  "crf": 23,
+  "aspectMode": "letterbox",
+  "maxDuration": 140
+}

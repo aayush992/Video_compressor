@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: media-compressor-api
+    runtime: python
+    rootDir: .
+    buildCommand: apt-get update && apt-get install -y ffmpeg && pip install -r backend/requirements-prod.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: media-compressor-db
+          property: connectionString
+      - key: CLOUDINARY_URL
+        sync: false   # paste your Cloudinary URL: cloudinary://API_KEY:API_SECRET@CLOUD_NAME
+      - key: ALLOWED_ORIGIN
+        sync: false   # set to your Vercel frontend URL, e.g. https://your-app.vercel.app
+      - key: GOOGLE_CLIENT_ID
+        sync: false   # paste your Google OAuth Client ID here
+      - key: JWT_SECRET
+        generateValue: true   # Render auto-generates a secure random value
+    autoDeploy: true
+
+databases:
+  - name: media-compressor-db
+    databaseName: media_compressor
+    user: media_compressor_user
+    plan: free

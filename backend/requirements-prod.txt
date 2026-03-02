@@ -1,0 +1,25 @@
+# Production requirements for Render free tier (512 MB RAM)
+# ML/detection packages are excluded — smart-crop falls back to center-crop
+# To enable AI detection, use requirements.txt instead (needs >1 GB RAM)
+
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.6.0
+python-multipart>=0.0.9
+pillow>=10.2.0
+numpy>=1.26.0
+python-magic>=0.4.27       # Linux/macOS (Render runs Ubuntu)
+python-dotenv>=1.0.0
+
+# --- Database ---
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0
+
+# --- Cloud storage ---
+cloudinary>=1.40.0
+
+# --- Auth ---
+python-jose[cryptography]>=3.3.0
+bcrypt>=4.0.0
+passlib[bcrypt]>=1.7.4
+google-auth>=2.28.0

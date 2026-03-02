@@ -1,0 +1,11 @@
+{
+  "platform": "youtube_landscape",
+  "label": "YouTube (Landscape)",
+  "resolution": "1920x1080",
+  "codec": "h264",
+  "fps": 60,
+  "bitrate": "40M",
+  "crf": 18,
+  "aspectMode": "letterbox",
+  "maxDuration": null
+}

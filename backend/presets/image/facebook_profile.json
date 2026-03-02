@@ -1,0 +1,9 @@
+{
+  "platform": "facebook_profile",
+  "label": "Facebook Profile Photo",
+  "mediaType": "image",
+  "resolution": "320x320",
+  "codec": "jpg",
+  "crf": 85,
+  "aspectMode": "crop"
+}
